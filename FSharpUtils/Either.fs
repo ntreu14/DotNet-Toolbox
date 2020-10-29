@@ -24,12 +24,12 @@ let isLeft = function
   | Right _ -> false
 
 let fromLeft aDefault = function
-| Left l -> l
-| Right _ -> aDefault
+  | Left l -> l
+  | Right _ -> aDefault
 
 let fromRight aDefault = function
-| Left _ -> aDefault
-| Right r -> r
+  | Left _ -> aDefault
+  | Right r -> r
 
 let either (f: 'a -> 'c) (g: 'b -> 'c) = function
   | Left l -> f l
