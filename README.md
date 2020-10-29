@@ -1,0 +1,1 @@
+## A collection of .NET types, functions and extensions that I have found to be useful in the past.
