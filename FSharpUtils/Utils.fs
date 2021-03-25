@@ -42,13 +42,9 @@ let undefined<'a> : 'a = raise <| NotImplementedException "undefined result"
 
 // Option
 type OptionBuilder() =
-      
   member this.Bind(opt, f) = Option.bind f opt
-
   member this.Return(v) = Some v
-    
   member this.ReturnFrom(v) = v
-
   member this.Zero() = None
 
 let option = OptionBuilder()

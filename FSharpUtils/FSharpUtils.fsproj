@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <Compile Include="Utils.fs" />
-    <Compile Include="Either.fs" />
+    <Compile Include="Types.fs" />
   </ItemGroup>
 
 </Project>
