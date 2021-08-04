@@ -31,20 +31,20 @@ namespace CSharpUtils.Fp
         public static IOption<TElem> TryFind<TElem>(IEnumerable<TElem> values, Func<TElem, bool> predicate) =>
             values.Any(predicate) ? Some.Of(values.First(predicate)) : new None<TElem>();
 
-        public static IOption<TElem> TryKey<TKey, TElem>(TKey key, IDictionary<TKey, TElem> dict) =>
-            dict.ContainsKey(key) ? Some.Of(dict[key]) : new None<TElem>();
-
         public static IEnumerable<TResult> Choose<T, TResult>(IEnumerable<T> xs, Func<T, IOption<TResult>> chooser) =>
             xs.SelectMany(x => chooser(x).ToList());
 
-        public delegate bool ParserDelegate<T>(string str, out T result);
+        public delegate bool ParserDelegate<in TValue, TResult>(TValue str, out TResult result);
 
-        public static IOption<T> TryParse<T>(string str, ParserDelegate<T> parser) =>
-            parser(str, out var perhapsResult) ? Some.Of(perhapsResult) : new None<T>();
+        public static IOption<TResult> TryParse<TValue, TResult>(TValue str, ParserDelegate<TValue, TResult> parser) =>
+            parser(str, out var perhapsResult) ? Some.Of(perhapsResult) : new None<TResult>();
 
-        public static IOption<int> TryParseInt(string str) => TryParse<int>(str, int.TryParse);
+        public static IOption<TElem> TryKey<TKey, TElem>(TKey key, IDictionary<TKey, TElem> dict) =>
+          TryParse<TKey, TElem>(key, dict.TryGetValue);  
 
-        public static IOption<DateTime> TryParseDateTime(string str) => TryParse<DateTime>(str, DateTime.TryParse);
+        public static IOption<int> TryParseInt(string str) => TryParse<string, int>(str, int.TryParse);
+
+        public static IOption<DateTime> TryParseDateTime(string str) => TryParse<string, DateTime>(str, DateTime.TryParse);
     }
 
     public static class Some
