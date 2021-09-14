@@ -9,7 +9,7 @@ namespace CSharpUtils.Fp
     public abstract T Empty { get; }
     public abstract T Append(T first, T second);
 
-    protected T CheckForNullsOrAppend(T first, T second, Func<T> thunk) =>
+    protected T HandleNullsOrThunk(T first, T second, Func<T> thunk) =>
       (first, second) switch
       {
         (null, null) => Empty,
@@ -26,7 +26,7 @@ namespace CSharpUtils.Fp
     public override string Empty => string.Empty;
 
     public override string Append(string first, string second) =>
-      CheckForNullsOrAppend(first, second, () => $"{first}{second}");
+      HandleNullsOrThunk(first, second, () => $"{first}{second}");
   }
 
   public class ListMonoid<T> : Monoid<List<T>>
@@ -34,6 +34,6 @@ namespace CSharpUtils.Fp
     public override List<T> Empty => new List<T>();
 
     public override List<T> Append(List<T> first, List<T> second) =>
-      CheckForNullsOrAppend(first, second, () => first.Concat(second).ToList());
+      HandleNullsOrThunk(first, second, () => first.Concat(second).ToList());
   }
 }
