@@ -23,7 +23,7 @@ namespace CSharpUtils.Fp
 
   public class StringMonoid : Monoid<string>
   {
-    public override string Empty => "";
+    public override string Empty => string.Empty;
 
     public override string Append(string first, string second) =>
       CheckForNullsOrAppend(first, second, () => $"{first}{second}");
