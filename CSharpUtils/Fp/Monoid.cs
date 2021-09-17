@@ -4,36 +4,36 @@ using System.Linq;
 
 namespace CSharpUtils.Fp
 {
-  public abstract class Monoid<T>
-  {
-    public abstract T Empty { get; }
-    public abstract T Append(T first, T second);
+    public abstract class Monoid<T>
+    { 
+        public abstract T Empty { get; }
+        public abstract T Append(T first, T second);
 
-    protected T HandleNullsOrThunk(T first, T second, Func<T> thunk) =>
-      (first, second) switch
-      {
-        (null, null) => Empty,
-        (null, _)    => second,
-        (_, null)    => first,
-        _            => thunk()
-      };
+        protected T HandleNullsOrThunk(T first, T second, Func<T> thunk) =>
+            (first, second) switch
+            {
+                (null, null) => Empty,
+                (null, _)    => second,
+                (_, null)    => first,
+                _            => thunk()
+            };
 
-    public virtual T Concat(IEnumerable<T> xs) => xs.Aggregate(Empty, Append);
-  }
+        public virtual T Concat(IEnumerable<T> xs) => xs.Aggregate(Empty, Append);
+    }
 
-  public class StringMonoid : Monoid<string>
-  {
-    public override string Empty => string.Empty;
+    public class StringMonoid : Monoid<string>
+    { 
+        public override string Empty => string.Empty;
 
-    public override string Append(string first, string second) =>
-      HandleNullsOrThunk(first, second, () => $"{first}{second}");
-  }
+        public override string Append(string first, string second) =>
+            HandleNullsOrThunk(first, second, () => $"{first}{second}");
+    }
 
-  public class ListMonoid<T> : Monoid<List<T>>
-  {
-    public override List<T> Empty => new List<T>();
+    public class ListMonoid<T> : Monoid<List<T>>
+    {
+        public override List<T> Empty => new List<T>();
 
-    public override List<T> Append(List<T> first, List<T> second) =>
-      HandleNullsOrThunk(first, second, () => first.Concat(second).ToList());
-  }
+        public override List<T> Append(List<T> first, List<T> second) => 
+            HandleNullsOrThunk(first, second, () => first.Concat(second).ToList());
+    }
 }
