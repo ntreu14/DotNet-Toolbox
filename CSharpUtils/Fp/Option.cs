@@ -19,6 +19,8 @@ namespace CSharpUtils.Fp
 
         List<T> ToList();
     }
+    
+    public delegate bool ParserDelegate<in TValue, TResult>(TValue str, out TResult result);
 
     public static class Option
     {
@@ -33,8 +35,6 @@ namespace CSharpUtils.Fp
 
         public static IEnumerable<TResult> Choose<T, TResult>(IEnumerable<T> xs, Func<T, IOption<TResult>> chooser) =>
             xs.SelectMany(x => chooser(x).ToList());
-
-        public delegate bool ParserDelegate<in TValue, TResult>(TValue str, out TResult result);
 
         public static IOption<TResult> TryParse<TValue, TResult>(TValue str, ParserDelegate<TValue, TResult> parser) =>
             parser(str, out var perhapsResult) ? Some.Of(perhapsResult) : new None<TResult>();
