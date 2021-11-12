@@ -22,10 +22,19 @@ let tryUnsafe (potentiallyUnsafe: unit -> 'a) (onException: exn -> 'a option) : 
   try
     potentiallyUnsafe () |> Some
   with 
-    | _ as ex -> onException ex
+    | ex -> onException ex
 
 let tryUnsafeOrNone (potentiallyUnsafe: unit -> 'a) : 'a option =
   tryUnsafe potentiallyUnsafe <| always None
+
+let tryUnsafeResult (potentiallyUnsafe: unit -> 'a) (onException: exn -> 'b) : Result<'a, 'b> =
+  try
+    potentiallyUnsafe () |> Ok
+  with
+    | ex -> onException ex |> Error
+
+let tryUnsafeOrExceptionMsg (potentiallyUnsafe: unit -> 'a) =
+  tryUnsafeResult potentiallyUnsafe <| fun ex -> ex.Message
 
 let tryParse parser (str: string) =
   match parser str with
