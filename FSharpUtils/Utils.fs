@@ -12,7 +12,7 @@ let inline uncurry f (a, b) = f a b
 
 let inline swap (a, b) = (b, a)
  
-let inline (<->) a b = b, a
+let inline (<->) a b = (b, a)
 
 let inline (=>) a b = (a, b)
  
