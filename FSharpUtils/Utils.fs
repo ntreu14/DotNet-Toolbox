@@ -35,6 +35,9 @@ let tryUnsafeResult (potentiallyUnsafe: unit -> 'a) (onException: exn -> 'b) : R
 
 let tryUnsafeOrExceptionMsg (potentiallyUnsafe: unit -> 'a) =
   tryUnsafeResult potentiallyUnsafe <| fun ex -> ex.Message
+  
+let tryUnsafeOrException (potentiallyUnsafe: unit -> 'a) =
+  tryUnsafeResult potentiallyUnsafe id
 
 let tryParse parser (str: string) =
   match parser str with
