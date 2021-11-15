@@ -54,6 +54,9 @@ let tryParseDateTime = tryParse DateTime.TryParse
 
 let tryParseDecimal = tryParse Decimal.TryParse
 
+let isParsableBy parser =
+  Option.isSome << tryParse parser
+
 let undefined<'a> : 'a = raise <| NotImplementedException "undefined result"
 
 // Option
