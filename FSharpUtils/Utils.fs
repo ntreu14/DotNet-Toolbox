@@ -22,6 +22,9 @@ let inline tee f x =
 
 let inline (|>!) x f = tee f x
 
+let inline (|??) (nullable: 'a Nullable) aDefault =
+  Option.ofNullable nullable |> Option.defaultValue aDefault
+
 let tryUnsafe (potentiallyUnsafe: unit -> 'a) (onException: exn -> 'a option) : 'a option =
   try
     potentiallyUnsafe () |> Some
@@ -58,6 +61,13 @@ let isParsableBy parser =
   Option.isSome << tryParse parser
 
 let undefined<'a> : 'a = raise <| NotImplementedException "undefined result"
+
+let toLower (str: string) =
+  match str with
+    | null -> null
+    | str -> str.ToLowerInvariant ()
+    
+let (|ToLower|) = toLower 
 
 // Option
 type OptionBuilder() =
