@@ -69,6 +69,8 @@ module NonEmptyList =
   let fold f state (NonEmptyList (head, tail)) =
     List.fold f (f state head) tail
 
+// Note that .NET has the built in `Result<'a, 'b> type which 
+// effectively is this type.  
 type Either<'a, 'b> =
   | Left of 'a
   | Right of 'b
