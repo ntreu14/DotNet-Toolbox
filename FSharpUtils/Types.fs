@@ -3,7 +3,7 @@
 type NonEmptyString = 
   private NonEmptyString of string
 
-[<RequireQualifiedAccessAttribute>]
+[<RequireQualifiedAccess>]
 module NonEmptyString =
 
   let fromString str =
@@ -38,7 +38,7 @@ module NonEmptyString =
 type NonEmptyList<'a> = 
   private NonEmptyList of ('a * 'a list)
 
-[<RequireQualifiedAccessAttribute>]
+[<RequireQualifiedAccess>]
 module NonEmptyList =
 
   let create head tail = NonEmptyList (head, tail)
@@ -73,7 +73,7 @@ type Either<'a, 'b> =
   | Left of 'a
   | Right of 'b
 
-[<RequireQualifiedAccessAttribute>]
+[<RequireQualifiedAccess>]
 module Either =
 
   let lift = Right
