@@ -1,5 +1,7 @@
 ﻿module Types
 
+open System.Collections.Generic
+
 type NonEmptyString = 
   private NonEmptyString of string
 
@@ -35,118 +37,85 @@ module NonEmptyString =
     NonEmptyString <| str.Trim ()
 
 
-type NonEmptyList<'a> = 
-  private NonEmptyList of ('a * 'a list)
+type 'a NonEmptyList = 
+  private
+    {
+      Head: 'a
+      Tail: 'a list
+    }
+  
+    member this.Length = 1 + List.length this.Tail
+    
+    member this.Item =
+      function
+      | 0 -> this.Head
+      | n -> this.Tail[n-1]
+
+    interface IReadOnlyCollection<'a> with
+      member this.Count = this.Length
+      member this.GetEnumerator(): IEnumerator<'a> =
+        (seq {
+          yield this.Head
+          yield! this.Tail
+        }).GetEnumerator()
+          
+      member this.GetEnumerator(): System.Collections.IEnumerator =
+        (seq {
+          yield this.Head
+          yield! this.Tail
+        }).GetEnumerator()
+        :> System.Collections.IEnumerator
+
+    interface IReadOnlyList<'a> with
+      member this.Item with get index = this.Item index
 
 [<RequireQualifiedAccess>]
 module NonEmptyList =
+  let create head tail = { Head=head; Tail=tail }
 
-  let create head tail = NonEmptyList (head, tail)
-
-  let fromList = function
+  let fromList =
+    function
     | [] -> None
-    | head::tail -> Some <| NonEmptyList (head, tail)
+    | head::tail -> Some { Head = head; Tail = tail }
 
-  let singleton v = NonEmptyList (v, []) 
+  let singleton head = { Head = head; Tail = [] } 
 
-  let head (NonEmptyList (head, _)) = head
+  let head { Head=head } = head
 
-  let tail (NonEmptyList (_, tail)) = tail
+  let tail { Tail=tail } = tail
+  
+  let cons x { Head=head; Tail=tail } =
+    { Head = x; Tail = head :: tail }
 
-  let toList (NonEmptyList (head, tail)) = head :: tail
+  let toList { Head=head; Tail=tail } = head :: tail
 
-  let map f (NonEmptyList (head, tail)) =
-    NonEmptyList (f head, List.map f tail)
+  let ofList =
+    function
+    | [] -> None
+    | x::xs -> create x xs |> Some
+  
+  let toSeq { Head=head; Tail=tail } =
+    seq {
+        yield head
+        yield! tail
+      }
+  
+  let ofSeq seq = Seq.toList seq |> ofList
+    
+  let toArray nel = toList nel |> List.toArray
+  
+  let ofArray arr = Array.toList arr |> ofList
+  
+  let map f { Head=head; Tail=tail } =
+    { Head = f head; Tail = List.map f tail }
 
-  let bind f (NonEmptyList (head, tail)) =
-    let (NonEmptyList (a, b)) = f head
-    let c = List.collect (toList << f) tail
-    NonEmptyList (a, List.append b c)
+  let collect f { Head=head; Tail=tail } =
+    let { Head = firstHead; Tail = firstTail } = f head
+    let secondTail = tail |> List.collect (f >> toList)
+    { Head = firstHead; Tail = firstTail @ secondTail }
 
   let apply l1 l2 =
-    l1 |> bind (fun f -> map f l2)
+    l1 |> collect (fun f -> map f l2)
 
-  let fold f state (NonEmptyList (head, tail)) =
+  let fold f state { Head=head; Tail=tail } =
     List.fold f (f state head) tail
-
-// Note that .NET has the built in `Result<'a, 'b> type which 
-// effectively is this type.  
-type Either<'a, 'b> =
-  | Left of 'a
-  | Right of 'b
-
-[<RequireQualifiedAccess>]
-module Either =
-
-  let lift = Right
-
-  let fromLeft aDefault = function
-    | Left e -> e
-    | Right _ -> aDefault
-
-  let fromRight aDefault = function
-    | Left _ -> aDefault
-    | Right r -> r
-
-  let isLeft = function
-    | Left _ -> true
-    | _ -> false
-
-  let isRight = function
-    | Right _ -> true
-    | _ -> false
-
-  let lefts eithers = 
-    eithers |> Seq.choose (function Left e -> Some e | _ -> None)
- 
-  let rights eithers = 
-    eithers |> Seq.choose (function Right r -> Some r | _ -> None)
-
-  let map f = function
-    | Left e -> Left e
-    | Right r -> f r |> Right
-
-  let biMap (f: 'a -> 'c) (g: 'b -> 'd) = function
-    | Left e -> f e |> Left
-    | Right r -> g r |> Right
-
-  let first (f: 'a -> 'b) = biMap f id 
-
-  let second (f: 'b -> 'c) = biMap id f
-
-  let bind f = function
-    | Left e -> Left e
-    | Right r -> f r
-
-  let apply e1 e2 =
-    e1 |> bind (fun f -> map f e2) 
-
-  let liftA2 f = apply << map f 
-
-  let fold f state = function
-    | Left _ -> state
-    | Right r -> f state r
-
-  let either (f: 'a -> 'c) (g: 'b -> 'c) = function
-    | Left e -> f e
-    | Right r -> g r
-
-  let partitionEithers eithers =
-    let addLeft (l, r) a = (a::l, r)
-    let addRight (l, r) a = (l, a::r)
-
-    eithers |> Seq.fold (fun state -> either (addLeft state) (addRight state)) ([], [])  
-
-  let executeSideEffect (sideEffect: 'b -> unit) = function
-    | Left l -> Left l
-    | Right r ->
-        sideEffect r
-        Right r
-
-
-type EitherBuilder() =
-  member this.Return(v) = Right v
-  member this.ReturnFrom(either) = either 
-  member this.Bind(either, f) = Either.bind f either
-
-let either = EitherBuilder()
