@@ -81,12 +81,7 @@ type 'a NonEmptyList =
 
 [<RequireQualifiedAccess>]
 module NonEmptyList =
-  let create head tail = { Head=head; Tail=tail }
-
-  let fromList =
-    function
-    | [] -> None
-    | head::tail -> Some { Head = head; Tail = tail }
+  let create head tail = { Head = head; Tail = tail }
 
   let singleton head = { Head = head; Tail = [] } 
 
