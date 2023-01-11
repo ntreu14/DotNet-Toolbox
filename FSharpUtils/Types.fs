@@ -1,5 +1,7 @@
 ﻿module Types
 
+open System
+open System.Collections
 open System.Collections.Generic
 
 type NonEmptyString = 
@@ -9,7 +11,7 @@ type NonEmptyString =
 module NonEmptyString =
 
   let fromString str =
-    if System.String.IsNullOrEmpty str
+    if String.IsNullOrEmpty str
     then None
     else Some <| NonEmptyString str
 
@@ -50,21 +52,29 @@ type 'a NonEmptyList =
       function
       | 0 -> this.Head
       | n -> this.Tail[n-1]
+      
+    interface IEnumerable<'a> with
+      member this.GetEnumerator() : IEnumerator<'a> =
+        let xs =
+          seq {
+            yield this.Head
+            yield! this.Tail
+          }
+          
+        xs.GetEnumerator()
+        
+    interface IEnumerable with
+      member this.GetEnumerator() : IEnumerator =
+        let xs =
+          seq {
+            yield this.Head
+            yield! this.Tail
+          }
+          
+        xs.GetEnumerator() :> IEnumerator
 
     interface IReadOnlyCollection<'a> with
       member this.Count = this.Length
-      member this.GetEnumerator(): IEnumerator<'a> =
-        (seq {
-          yield this.Head
-          yield! this.Tail
-        }).GetEnumerator()
-          
-      member this.GetEnumerator(): System.Collections.IEnumerator =
-        (seq {
-          yield this.Head
-          yield! this.Tail
-        }).GetEnumerator()
-        :> System.Collections.IEnumerator
 
     interface IReadOnlyList<'a> with
       member this.Item with get index = this.Item index
